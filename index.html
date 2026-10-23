@@ -1,0 +1,872 @@
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Travel Survival & Speak Guide</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .glass-modal {
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Flashcard Flip Animation */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToHome()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+                    <i class="fa-solid fa-earth-asia text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+                        Travel Survival & Speak
+                    </h1>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Point & Show Phrasebook for Non-English Countries</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Practice Quiz Mode Button -->
+                <button onclick="openFlashcardsModal()" class="flex items-center space-x-1.5 bg-purple-600/20 border border-purple-500/30 hover:bg-purple-600/30 text-purple-300 text-xs font-semibold px-3 py-2 rounded-xl transition active:scale-95">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span class="hidden sm:inline">Practice Flashcards</span>
+                </button>
+
+                <!-- Add Phrase Button -->
+                <button onclick="openAddModal()" class="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition shadow-md shadow-indigo-600/20 active:scale-95">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden sm:inline">Add Custom Phrase</span>
+                    <span class="sm:hidden">Add</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Country Switcher Bar -->
+        <section class="space-y-2">
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <span>Select Destination Country:</span>
+                <span id="activeCountryLabel" class="text-indigo-400">Japan 🇯🇵</span>
+            </div>
+            <div id="countryPills" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                <!-- Dynamic Country Buttons -->
+            </div>
+        </section>
+
+        <!-- Emergency / Essential Quick Filters -->
+        <section class="bg-gradient-to-r from-red-950/40 via-indigo-950/40 to-slate-900/80 border border-red-500/20 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="flex items-center space-x-2 text-red-400 text-xs font-bold uppercase tracking-wider">
+                    <i class="fa-solid fa-kit-medical"></i>
+                    <span>Quick Survival & Emergency Phrasebook</span>
+                </div>
+                <h2 class="text-lg font-bold text-white">Need Help Fast? Select Quick Scenario</h2>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                <button onclick="filterByTag('Emergency')" class="flex-1 md:flex-initial px-3 py-1.5 rounded-xl bg-red-600/20 border border-red-500/40 hover:bg-red-600/30 text-red-200 text-xs font-semibold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Emergency
+                </button>
+                <button onclick="filterByTag('Transport')" class="flex-1 md:flex-initial px-3 py-1.5 rounded-xl bg-amber-600/20 border border-amber-500/40 hover:bg-amber-600/30 text-amber-200 text-xs font-semibold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-train"></i> Transit / Taxi
+                </button>
+                <button onclick="filterByTag('Dining')" class="flex-1 md:flex-initial px-3 py-1.5 rounded-xl bg-emerald-600/20 border border-emerald-500/40 hover:bg-emerald-600/30 text-emerald-200 text-xs font-semibold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-utensils"></i> Food & Pay
+                </button>
+                <button onclick="filterByTag('All')" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold">
+                    Show All
+                </button>
+            </div>
+        </section>
+
+        <!-- Search Bar & Category Filter Header -->
+        <section class="space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <!-- Search Input -->
+                <div class="relative flex-grow">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Search phrases, places, keywords (e.g., ticket, hotel, toilet, taxi)..."
+                        class="w-full pl-10 pr-10 py-3 bg-slate-900 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm shadow-inner transition">
+                    <button id="clearSearch" onclick="clearSearchInput()" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Category Dropdown / Select -->
+                <select id="categorySelect" onchange="handleCategoryChange()" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="All">All Categories / Places</option>
+                    <option value="Public Transport">🚉 Public Transport (Train/Bus/Taxi)</option>
+                    <option value="Airport & Flight">✈️ Airport & Flights</option>
+                    <option value="Hotel & Stay">🏨 Hotel & Lodging</option>
+                    <option value="Restaurant & Cafe">🍜 Restaurant, Cafe & Food</option>
+                    <option value="Convenience Store & Shopping">🏪 Convenience Store & Shopping</option>
+                    <option value="Pharmacy & Hospital">🏥 Pharmacy & Hospital</option>
+                    <option value="Tourist Spots & Asking Directions">🗼 Tourist Spots & Directions</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Places & Cards Grid -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-map-pin text-indigo-400"></i>
+                    <span id="placesHeading">Popular Places & Scenarios</span>
+                </h3>
+                <span id="cardCountBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                    0 Places
+                </span>
+            </div>
+
+            <!-- Grid Container -->
+            <div id="placesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Places dynamically injected here -->
+            </div>
+
+            <!-- Empty Search State -->
+            <div id="emptyState" class="hidden text-center py-16 space-y-3 glass-card rounded-2xl border border-dashed border-slate-800">
+                <div class="w-14 h-14 mx-auto rounded-full bg-slate-800 flex items-center justify-center text-slate-400 text-xl">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <h4 class="text-base font-bold text-slate-300">No matching phrases found!</h4>
+                <p class="text-slate-500 text-xs max-w-sm mx-auto">Try searching for simple words like "water", "help", "train", or "ticket". You can also add your own phrase!</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs text-slate-500 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p>© 2026 Global Travel Survival & Speak Guide. Designed for International Travelers.</p>
+            <div class="flex items-center space-x-4 text-slate-400">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-volume-high text-indigo-400"></i> Native TTS Speech</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-expand text-purple-400"></i> Point & Show Mode</span>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- MODAL 1: POINT & SHOW / SHOW BIG MODE -->
+    <div id="showBigModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
+        <div class="w-full max-w-3xl glass-modal rounded-3xl p-6 sm:p-10 flex flex-col justify-between space-y-6 border border-indigo-500/30 shadow-2xl relative">
+            
+            <button onclick="closeShowBigModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Top Tip -->
+            <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-indigo-400 border-b border-slate-800 pb-3">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-mobile-screen-button"></i> Show this screen to the local person</span>
+                <span id="showBigCountryFlag" class="text-xl"></span>
+            </div>
+
+            <!-- Big Native Script Display -->
+            <div class="py-8 text-center space-y-6">
+                <div id="showBigNative" class="text-3xl sm:text-5xl md:text-6xl font-black text-amber-300 tracking-wide leading-tight font-sans select-all">
+                    <!-- Native script -->
+                </div>
+                <div id="showBigPhonetic" class="text-lg sm:text-2xl font-semibold text-slate-300 italic">
+                    <!-- Phonetics -->
+                </div>
+                <div id="showBigEnglish" class="text-sm sm:text-base font-medium text-slate-400 bg-slate-900/80 py-2.5 px-4 rounded-xl inline-block max-w-lg">
+                    <!-- English meaning -->
+                </div>
+            </div>
+
+            <!-- Controls: Speech & Speed -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <button id="showBigSpeakBtn" onclick="speakCurrentShowBig(1.0)" class="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition active:scale-95">
+                        <i class="fa-solid fa-volume-high text-lg"></i>
+                        <span>Speak Audio (Normal)</span>
+                    </button>
+                    <button onclick="speakCurrentShowBig(0.65)" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 font-semibold text-xs flex items-center justify-center gap-1.5 border border-slate-700 transition">
+                        <i class="fa-solid fa-gauge-simple-low"></i>
+                        <span>Slow Speech</span>
+                    </button>
+                </div>
+
+                <button onclick="closeShowBigModal()" class="w-full sm:w-auto px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">
+                    Done / Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL 2: FLASHCARD PRACTICE QUIZ -->
+    <div id="flashcardsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+        <div class="w-full max-w-xl glass-modal rounded-3xl p-6 sm:p-8 space-y-6 border border-purple-500/30 shadow-2xl relative">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Practice Flashcards</h3>
+                        <p class="text-[11px] text-slate-400">Master essential travel phrases before your trip</p>
+                    </div>
+                </div>
+                <button onclick="closeFlashcardsModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Flashcard Display Area -->
+            <div class="perspective-1000 w-full h-64 cursor-pointer" onclick="flipFlashcard()">
+                <div id="flashcardInner" class="relative w-full h-full duration-500 transform-style-3d glass-card rounded-2xl border border-slate-700/80 p-6 flex flex-col justify-between items-center text-center shadow-xl">
+                    
+                    <!-- Front (English) -->
+                    <div class="absolute inset-0 backface-hidden p-6 flex flex-col justify-between items-center bg-slate-900/90 rounded-2xl">
+                        <span class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">English Question / Need (Click to Flip 🔄)</span>
+                        <p id="cardFrontText" class="text-xl sm:text-2xl font-extrabold text-white">English Question</p>
+                        <span class="text-xs text-slate-500">Tap card to see local script & answer</span>
+                    </div>
+
+                    <!-- Back (Native & Phonetic) -->
+                    <div class="absolute inset-0 rotate-y-180 backface-hidden p-6 flex flex-col justify-between items-center bg-indigo-950/90 border border-indigo-500/40 rounded-2xl">
+                        <span class="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Native Script & Phonetic</span>
+                        <div class="space-y-2">
+                            <p id="cardBackNative" class="text-2xl sm:text-3xl font-black text-amber-300">Native Text</p>
+                            <p id="cardBackPhonetic" class="text-sm font-semibold text-slate-200 italic">Phonetic</p>
+                        </div>
+                        <button onclick="event.stopPropagation(); speakFlashcardAudio();" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md">
+                            <i class="fa-solid fa-volume-high"></i> Listen Pronunciation
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls (Next / Prev) -->
+            <div class="flex items-center justify-between pt-2">
+                <button onclick="prevFlashcard()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                </button>
+                <span id="flashcardCounter" class="text-xs font-semibold text-slate-400">1 / 10</span>
+                <button onclick="nextFlashcard()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 shadow-md">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL 3: ADD CUSTOM PHRASE -->
+    <div id="addModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+        <div class="w-full max-w-xl glass-modal rounded-3xl p-6 space-y-5 border border-slate-700 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-square-plus text-indigo-400"></i>
+                    <span>Add Custom Phrase or Place</span>
+                </h3>
+                <button onclick="closeAddModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleSaveCustomPhrase(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Target Country*</label>
+                        <select id="inputCountry" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                            <option value="Japan">Japan 🇯🇵</option>
+                            <option value="South Korea">South Korea 🇰🇷</option>
+                            <option value="UAE">UAE / Dubai 🇦🇪</option>
+                            <option value="France">France 🇫🇷</option>
+                            <option value="Germany">Germany 🇩🇪</option>
+                            <option value="Italy">Italy 🇮🇹</option>
+                            <option value="Spain">Spain 🇪🇸</option>
+                            <option value="China">China 🇨🇳</option>
+                            <option value="Thailand">Thailand 🇹🇭</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Category / Place*</label>
+                        <select id="inputCategory" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                            <option value="Public Transport">Public Transport</option>
+                            <option value="Airport & Flight">Airport & Flight</option>
+                            <option value="Hotel & Stay">Hotel & Stay</option>
+                            <option value="Restaurant & Cafe">Restaurant & Cafe</option>
+                            <option value="Convenience Store & Shopping">Convenience Store</option>
+                            <option value="Pharmacy & Hospital">Pharmacy & Hospital</option>
+                            <option value="Tourist Spots & Asking Directions">Tourist Spots</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">English Question / Sentence*</label>
+                    <input type="text" id="inputEnglish" required placeholder="e.g. Do you have vegetarian food?" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Native Script (Local Language)*</label>
+                        <input type="text" id="inputNative" required placeholder="e.g. ベジタリアン料理はありますか？" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">English Phonetic / Romanization*</label>
+                        <input type="text" id="inputPhonetic" required placeholder="e.g. Bejitarian ryōri wa arimasu ka?" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Photo URL (Optional Unsplash Link)</label>
+                    <input type="url" id="inputImage" placeholder="https://images.unsplash.com/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md">Save Custom Phrase</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Master Database of Countries, Languages, TTS Voice Codes, and Places/Phrases
+        const countryMeta = {
+            'Japan': { flag: '🇯🇵', langCode: 'ja-JP', langName: 'Japanese' },
+            'South Korea': { flag: '🇰🇷', langCode: 'ko-KR', langName: 'Korean' },
+            'UAE': { flag: '🇦🇪', langCode: 'ar-SA', langName: 'Arabic' },
+            'France': { flag: '🇫🇷', langCode: 'fr-FR', langName: 'French' },
+            'Germany': { flag: '🇩🇪', langCode: 'de-DE', langName: 'German' },
+            'Italy': { flag: '🇮🇹', langCode: 'it-IT', langName: 'Italian' },
+            'Spain': { flag: '🇪🇸', langCode: 'es-ES', langName: 'Spanish' },
+            'China': { flag: '🇨🇳', langCode: 'zh-CN', langName: 'Mandarin Chinese' },
+            'Thailand': { flag: '🇹🇭', langCode: 'th-TH', langName: 'Thai' }
+        };
+
+        const initialDataset = [
+            // JAPAN
+            {
+                id: 'jp-1',
+                country: 'Japan',
+                category: 'Public Transport',
+                placeName: 'Shinkansen / Train Station (電車駅)',
+                image: 'https://images.unsplash.com/photo-1532105956626-9569c03602f6?auto=format&fit=crop&w=800&q=80',
+                phrases: [
+                    { english: 'Where is the ticket counter?', native: 'チケット売り場はどこですか？', phonetic: 'Chiketto uriba wa doko desu ka?', tag: 'Transport' },
+                    { english: 'Does this train go to Tokyo Station?', native: 'この電車は東京駅に行きますか？', phonetic: 'Kono densha wa Tōkyō-eki ni ikimasu ka?', tag: 'Transport' },
+                    { english: 'One IC Card (Suica/Pasmo) recharge, please.', native: 'ICカードのチャージをお願いします。', phonetic: 'Aishī kādo no chāji o onegaishimasu.', tag: 'Transport' }
+                ]
+            },
+            {
+                id: 'jp-2',
+                country: 'Japan',
+                category: 'Convenience Store & Shopping',
+                placeName: '7-Eleven / FamilyMart (コンビニ)',
+                image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
+                phrases: [
+                    { english: 'Can I pay by credit card?', native: 'クレジットカードは使えますか？', phonetic: 'Kurejitto kādo wa tsukaemasu ka?', tag: 'Dining' },
+                    { english: 'Please warm this up in the microwave.', native: '温めていただけますか？', phonetic: 'Atatame te itadakemasu ka?', tag: 'Dining' },
+                    { english: 'Where is the ATM?', native: 'ATMはどこにありますか？', phonetic: 'Eitiemu wa doko ni arimasu ka?', tag: 'Emergency' }
+                ]
+            },
+            {
+                id: 'jp-3',
+                country: 'Japan',
+                category: 'Restaurant & Cafe',
+                placeName: 'Ramen & Izakaya Dining (居酒屋)',
+                image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
+                phrases: [
+                    { english: 'Excuse me! (Calling server)', native: 'すみません！', phonetic: 'Sumimasen!', tag: 'Dining' },
+                    { english: 'Does this contain pork?', native: 'これに豚肉は入っていますか？', phonetic: 'Kore ni butaniku wa haitte imasu ka?', tag: 'Dining' },
+                    { english: 'Water, please.', native: 'お水をお願いします。', phonetic: 'Omizu o onegaishimasu.', tag: 'Dining' },
+                    { english: 'Check / Bill, please.', native: 'お会計をお願いします。', phonetic: 'Okaikei o onegaishimasu.', tag: 'Dining' }
+                ]
+            },
+            {
+                id: 'jp-4',
+                country: 'Japan',
+                category: 'Pharmacy & Hospital',
+                placeName: 'Drugstore / Emergency (薬局)',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80',
+                phrases: [
+                    { english: 'I feel sick / unwell.', native: '気分が悪いです。', phonetic: 'Kibun ga warui desu.', tag: 'Emergency' },
+                    { english: 'Do you have headache painkiller medicine?', native: '頭痛薬はありますか？', phonetic: 'Zutsūyaku wa arimasu ka?', tag: 'Emergency' },
+                    { english: 'Please call an ambulance!', native: '救急車を呼んでください！', phonetic: 'Kyūkyūsha o yonde kudasai!', tag: 'Emergency' }
+                ]
+            },
+
+            // SOUTH KOREA
+            {
+                id: 'kr-1',
+                country: 'South Korea',
+                category: 'Public Transport',
+                placeName: 'Seoul Subway & Taxi (지하철)',
+                image: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?auto=format&fit=crop&w=800&q=80',
+                phrases: [
+                    { english: 'Please take me to this address.', native: '이 주소로 가주세요.', phonetic: 'I jusoro gajuseyo.', tag: 'Transport' },
+                    { english: 'Where is the subway entrance?', native: '지하철 입구가 어디예요?', phonetic: 'Jihacheol ipguga eodiyeyo?', tag: 'Transport' },
+                    { english: 'Please stop here.', native: '여기서 내려주세요.', phonetic: 'Yeogiseo naeryeojuseyo.', tag: 'Transport' }
+                ]
+            },
+            {
+                id: 'kr-2',
+                country: 'South Korea',
+                category: 'Restaurant & Cafe',
+                placeName: 'Korean BBQ & Cafe (식당)',
+                image: 'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=800&q=80',
+                phrases: [
+                    { english: 'Is this spicy?', native: '이거 매워요?', phonetic: 'Igeo maewoyo?', tag: 'Dining' },
+                    { english: 'Water, please.', native: '물 좀 주세요.', phonetic: 'Mul jom juseyo.', tag: 'Dining' },
+                    { english: 'It\'s delicious!', native: '맛있어요!', phonetic: 'Masisseoyo!', tag: 'Dining' }
+                ]
+            },
+
+            // UAE (DUBAI)
+            {
+                id: 'uae-1',
+                country: 'UAE',
+                category: 'Public Transport',
+                placeName: 'Dubai Metro & Taxi (مترو دبي)',
+                image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80',
+                phrases: [
+                    { english: 'Where is the taxi stand?', native: 'أين موقف السيارات الأجرة؟', phonetic: 'Ayna mawqif al-taksi?', tag: 'Transport' },
+                    { english: 'How much to Dubai Mall?', native: 'كم التكلفة إلى دبي مول؟', phonetic: 'Kam al-taklifah ila Dubai Mall?', tag: 'Transport' }
+                ]
+            },
+
+            // FRANCE
+            {
+                id: 'fr-1',
+                country: 'France',
+                category: 'Public Transport',
+                placeName: 'Paris Metro & Train (Gare)',
+                image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80',
+                phrases: [
+                    { english: 'Where is the train station?', native: 'Où est la gare ?', phonetic: 'Oo ay lah gahr?', tag: 'Transport' },
+                    { english: 'Where are the toilets?', native: 'Où sont les toilettes ?', phonetic: 'Oo soh leh twah-let?', tag: 'Emergency' },
+                    { english: 'Do you speak English?', native: 'Parlez-vous anglais ?', phonetic: 'Par-lay voo ahn-glay?', tag: 'Emergency' }
+                ]
+            }
+        ];
+
+        // App State
+        let activeCountry = 'Japan';
+        let activeCategory = 'All';
+        let activeTagFilter = 'All';
+        let currentShowBigObj = null;
+        let masterDataset = [];
+        let flashcardsList = [];
+        let currentFlashcardIndex = 0;
+        let isCardFlipped = false;
+
+        // Initialize App
+        function initApp() {
+            const saved = localStorage.getItem('global_travel_phrases');
+            if (saved) {
+                try {
+                    masterDataset = JSON.parse(saved);
+                } catch (e) {
+                    masterDataset = [...initialDataset];
+                }
+            } else {
+                masterDataset = [...initialDataset];
+            }
+
+            renderCountryPills();
+            renderGrid();
+        }
+
+        // Render Country Selection Pills
+        function renderCountryPills() {
+            const container = document.getElementById('countryPills');
+            const countries = Object.keys(countryMeta);
+
+            container.innerHTML = countries.map(country => {
+                const meta = countryMeta[country];
+                const isActive = activeCountry === country;
+
+                return `
+                    <button onclick="selectCountry('${country}')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition duration-200 border flex items-center gap-1.5 flex-shrink-0 ${
+                        isActive
+                        ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/30'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                    }">
+                        <span>${meta.flag}</span>
+                        <span>${country}</span>
+                    </button>
+                `;
+            }).join('');
+
+            document.getElementById('activeCountryLabel').textContent = `${activeCountry} ${countryMeta[activeCountry].flag}`;
+        }
+
+        function selectCountry(country) {
+            activeCountry = country;
+            renderCountryPills();
+            renderGrid();
+        }
+
+        function filterByTag(tag) {
+            activeTagFilter = tag;
+            renderGrid();
+        }
+
+        function handleSearch() {
+            const clearBtn = document.getElementById('clearSearch');
+            const query = document.getElementById('searchInput').value;
+            if (query) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+            renderGrid();
+        }
+
+        function clearSearchInput() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            renderGrid();
+        }
+
+        function handleCategoryChange() {
+            activeCategory = document.getElementById('categorySelect').value;
+            renderGrid();
+        }
+
+        function resetToHome() {
+            activeCountry = 'Japan';
+            activeCategory = 'All';
+            activeTagFilter = 'All';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categorySelect').value = 'All';
+            renderCountryPills();
+            renderGrid();
+        }
+
+        // Filter and Render Cards Grid
+        function renderGrid() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const grid = document.getElementById('placesGrid');
+            const emptyState = document.getElementById('emptyState');
+            const badge = document.getElementById('cardCountBadge');
+
+            const filtered = masterDataset.filter(item => {
+                const matchesCountry = item.country === activeCountry;
+                const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
+                
+                let matchesTag = true;
+                if (activeTagFilter !== 'All') {
+                    matchesTag = item.phrases && item.phrases.some(p => p.tag === activeTagFilter);
+                }
+
+                let matchesSearch = true;
+                if (query) {
+                    matchesSearch = item.placeName.toLowerCase().includes(query) ||
+                        item.category.toLowerCase().includes(query) ||
+                        (item.phrases && item.phrases.some(p => 
+                            p.english.toLowerCase().includes(query) ||
+                            p.native.toLowerCase().includes(query) ||
+                            p.phonetic.toLowerCase().includes(query)
+                        ));
+                }
+
+                return matchesCountry && matchesCategory && matchesTag && matchesSearch;
+            });
+
+            badge.textContent = `${filtered.length} Places`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            const meta = countryMeta[activeCountry];
+
+            grid.innerHTML = filtered.map(place => `
+                <div class="glass-card rounded-2xl overflow-hidden shadow-xl hover:border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <!-- Header Photo -->
+                        <div class="relative h-44 w-full overflow-hidden">
+                            <img src="${place.image}" alt="${place.placeName}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                            
+                            <div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-slate-700 text-[11px] font-bold text-indigo-300">
+                                ${place.category}
+                            </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="p-5 space-y-4">
+                            <h4 class="text-base font-bold text-white flex items-center justify-between">
+                                <span>${place.placeName}</span>
+                            </h4>
+
+                            <!-- Phrases List -->
+                            <div class="space-y-3">
+                                ${place.phrases.map((phrase, pIdx) => `
+                                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 space-y-1.5 hover:border-indigo-500/30 transition">
+                                        <div class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                                            <span>${phrase.english}</span>
+                                            ${phrase.tag ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">${phrase.tag}</span>` : ''}
+                                        </div>
+                                        <div class="text-base font-bold text-amber-300 tracking-wide">${phrase.native}</div>
+                                        <div class="text-xs text-indigo-300 italic">${phrase.phonetic}</div>
+
+                                        <!-- Phrase Actions -->
+                                        <div class="pt-2 flex items-center justify-between border-t border-slate-800/80 text-xs">
+                                            <button onclick="speakText('${escapeString(phrase.native)}', '${meta.langCode}')" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                                                <i class="fa-solid fa-volume-high"></i> Listen
+                                            </button>
+                                            
+                                            <button onclick="openShowBig('${escapeString(phrase.native)}', '${escapeString(phrase.phonetic)}', '${escapeString(phrase.english)}', '${meta.langCode}', '${meta.flag}')" class="bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 font-bold px-2.5 py-1 rounded-lg text-[11px] flex items-center gap-1">
+                                                <i class="fa-solid fa-expand"></i> Show Big Mode
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Helper to escape single quotes
+        function escapeString(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        // Native Speech Synthesis (Text-to-Speech)
+        function speakText(text, langCode = 'en-US', rate = 1.0) {
+            if (!('speechSynthesis' in window)) {
+                alert('Text-to-Speech audio is not supported on this browser.');
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = langCode;
+            utterance.rate = rate;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // SHOW BIG MODE (POINT & SHOW SCREEN)
+        function openShowBig(native, phonetic, english, langCode, flag) {
+            currentShowBigObj = { native, phonetic, english, langCode, flag };
+
+            document.getElementById('showBigNative').textContent = native;
+            document.getElementById('showBigPhonetic').textContent = phonetic;
+            document.getElementById('showBigEnglish').textContent = english;
+            document.getElementById('showBigCountryFlag').textContent = flag;
+
+            document.getElementById('showBigModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function speakCurrentShowBig(rate) {
+            if (currentShowBigObj) {
+                speakText(currentShowBigObj.native, currentShowBigObj.langCode, rate);
+            }
+        }
+
+        function closeShowBigModal() {
+            document.getElementById('showBigModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // FLASHCARD PRACTICE QUIZ
+        function openFlashcardsModal() {
+            const activeList = masterDataset.filter(item => item.country === activeCountry);
+            flashcardsList = [];
+            
+            activeList.forEach(place => {
+                place.phrases.forEach(p => {
+                    flashcardsList.push({
+                        english: p.english,
+                        native: p.native,
+                        phonetic: p.phonetic,
+                        langCode: countryMeta[activeCountry].langCode
+                    });
+                });
+            });
+
+            if (flashcardsList.length === 0) {
+                alert('No phrases available for this country to practice.');
+                return;
+            }
+
+            currentFlashcardIndex = 0;
+            isCardFlipped = false;
+            updateFlashcardUI();
+
+            document.getElementById('flashcardsModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function updateFlashcardUI() {
+            const card = flashcardsList[currentFlashcardIndex];
+            const inner = document.getElementById('flashcardInner');
+
+            // Reset flip
+            isCardFlipped = false;
+            inner.classList.remove('rotate-y-180');
+
+            document.getElementById('cardFrontText').textContent = card.english;
+            document.getElementById('cardBackNative').textContent = card.native;
+            document.getElementById('cardBackPhonetic').textContent = card.phonetic;
+
+            document.getElementById('flashcardCounter').textContent = `${currentFlashcardIndex + 1} / ${flashcardsList.length}`;
+        }
+
+        function flipFlashcard() {
+            const inner = document.getElementById('flashcardInner');
+            isCardFlipped = !isCardFlipped;
+            if (isCardFlipped) {
+                inner.classList.add('rotate-y-180');
+            } else {
+                inner.classList.remove('rotate-y-180');
+            }
+        }
+
+        function speakFlashcardAudio() {
+            const card = flashcardsList[currentFlashcardIndex];
+            speakText(card.native, card.langCode);
+        }
+
+        function nextFlashcard() {
+            if (currentFlashcardIndex < flashcardsList.length - 1) {
+                currentFlashcardIndex++;
+                updateFlashcardUI();
+            }
+        }
+
+        function prevFlashcard() {
+            if (currentFlashcardIndex > 0) {
+                currentFlashcardIndex--;
+                updateFlashcardUI();
+            }
+        }
+
+        function closeFlashcardsModal() {
+            document.getElementById('flashcardsModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // CUSTOM PHRASE CREATION
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function handleSaveCustomPhrase(e) {
+            e.preventDefault();
+
+            const country = document.getElementById('inputCountry').value;
+            const category = document.getElementById('inputCategory').value;
+            const english = document.getElementById('inputEnglish').value.trim();
+            const native = document.getElementById('inputNative').value.trim();
+            const phonetic = document.getElementById('inputPhonetic').value.trim();
+            const image = document.getElementById('inputImage').value.trim() || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
+
+            const newPlace = {
+                id: 'custom-' + Date.now(),
+                country,
+                category,
+                placeName: `Custom: ${category}`,
+                image,
+                phrases: [
+                    { english, native, phonetic, tag: 'Custom' }
+                ]
+            };
+
+            masterDataset.unshift(newPlace);
+            localStorage.setItem('global_travel_phrases', JSON.stringify(masterDataset));
+
+            selectCountry(country);
+            closeAddModal();
+        }
+
+        // On Load
+        window.onload = function() {
+            initApp();
+        };
+    </script>
+</body>
+</html>
+```
